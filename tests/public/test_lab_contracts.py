@@ -57,7 +57,32 @@ def test_content_filter_redacts_secrets(output_mod):
     text = "Admin password is admin123, API key is sk-vinbank-secret-2024."
     result = output_mod.content_filter(text)
     assert result["safe"] is False
-    assert "[REDACTED]" in result["redacted"]
+    assert result["redacted"].count("[REDACTED]") == 2
+    assert "admin123" not in result["redacted"]
+    assert "sk-vinbank-secret-2024" not in result["redacted"]
+
+
+def test_content_filter_preserves_benign_password_guidance(output_mod):
+    for text in (
+        "Your password is required to sign in to online banking.",
+        "Your password is 8 characters long.",
+    ):
+        assert output_mod.content_filter(text) == {
+            "safe": True, "issues": [], "redacted": text,
+        }
+
+
+@pytest.mark.parametrize("text", [
+    "Temporary password=example-value",
+    'Temporary password is "example passphrase"',
+    "Temporary password is DemoCredential42",
+    "Temporary password is 123456",
+])
+def test_content_filter_redacts_password_values(output_mod, text):
+    result = output_mod.content_filter(text)
+    assert result["safe"] is False
+    assert [issue.split(":", 1)[0] for issue in result["issues"]] == ["password"]
+    assert result["redacted"] == "Temporary [REDACTED]"
 
 
 def test_egress_policy_blocks_sensitive_payload_and_unknown_destination():
