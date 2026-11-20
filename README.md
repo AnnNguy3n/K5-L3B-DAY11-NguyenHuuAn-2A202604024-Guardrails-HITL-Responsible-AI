@@ -1,5 +1,19 @@
 # Day 11 — Controlled Agent Security (2026)
 
+## Thông tin bài nộp
+
+**Nguyễn Hữu An** · **2A202604024** · **L3B**
+
+Sau khi chuẩn bị môi trường theo mục 3, em chạy các lệnh sau từ gốc repo để kiểm tra phần Blue và tạo báo cáo tự chấm từ các minh chứng trong `outputs/`.
+
+```bash
+python src/main.py --part 2
+python src/main.py --part 3
+python scripts/grade.py --submission-dir . --out outputs/grade_report.json
+```
+
+[Báo cáo Lab 11](outputs/lab_report.md) · [Kết quả tự chấm](outputs/grade_report.json)
+
 > 👤 **Hình thức:** bài tập **cá nhân** (1 người / 1 MSSV).  
 > 🎯 **Mục tiêu:** đóng vai **Blue Team** để học cách xây Guardrails phòng thủ, rồi đóng vai **Red Team** để tấn công agent **Red** hoặc **Red Advance**.  
 > ✅ Làm theo **Checkpoint 1 → 5** trong [`CHECKPOINTS.md`](CHECKPOINTS.md) · nộp theo [`SUBMISSION.md`](SUBMISSION.md).
@@ -14,7 +28,7 @@
 | Lab làm bài (Checkpoint 2 → 5) | ≈ **130'** |
 | **Tổng** | ≈ **160'** |
 
-**Hạn nộp:** **23h59 cùng ngày làm Lab** (ICT / GMT+7). Gia hạn chỉ khi Key Coach thông báo trong 48 giờ sau Lab — xem [`RULES.md`](RULES.md).
+**Hạn nộp theo hướng dẫn nộp bài** là **23h59 cùng ngày làm Lab** cho ca sáng và **11h59 trưa hôm sau** cho ca chiều (ICT / GMT+7). Gia hạn theo thông báo của Key Coach trong 48 giờ sau Lab. [Hướng dẫn nộp bài](SUBMISSION.md#2-deadline)
 
 ---
 
@@ -62,7 +76,7 @@ Bonus lab chỉ tính **một** trong hai: leak **Red** (B1, tối đa +5) hoặ
 
 ---
 
-## Bộ tài liệu trong repo (quy ước Khóa 4)
+## Bộ tài liệu trong repo (quy ước Khóa 5)
 
 | File | Nội dung |
 |------|----------|
@@ -75,8 +89,7 @@ Bonus lab chỉ tính **một** trong hai: leak **Red** (B1, tối đa +5) hoặ
 
 Codelab lớp: xem `template-codelabs/codelab-day11-k4-l3a.md` (L3A) hoặc bản L3B tương ứng.
 
-**Repo nộp học viên:** `K4-<L3A hoặc L3B>-DAY11-<HoVaTen>-<MSSV>-Guardrails-HITL-Responsible-AI`  
-Ví dụ: `K4-L3A-DAY11-NguyenVanA-2A2026xxxxx-Guardrails-HITL-Responsible-AI`
+**Repo nộp học viên** theo mẫu `K5-<L3A hoặc L3B>-DAY11-<HoVaTen>-<MSSV>-Guardrails-HITL-Responsible-AI`.
 
 ---
 
