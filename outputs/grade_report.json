@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-11-20T15:47:07.471986+00:00",
-  "submission_dir": ".",
+  "generated_at": "2026-11-20T15:52:16.438583+00:00",
+  "submission_dir": "/Users/annnguy3n/Desktop/K5-L3B-DAY11-NguyenHuuAn-2A202604024-Guardrails-HITL-Responsible-AI",
   "technical_failure": false,
   "packaging": {
     "ok": true,
@@ -33,7 +33,6 @@
       "attack_total": 7,
       "edge_blocked": 2,
       "edge_total": 3,
-      "rate_limit_passed": 10,
       "rate_limit_blocked": 5,
       "rate_limit_sent": 15
     },
@@ -46,15 +45,9 @@
       "guards_total": 5
     }
   },
-  "smoke_tests": {
-    "returncode": 0,
-    "stdout": ".......................................                                  [100%]\n39 passed in 2.08s\n",
-    "stderr": "",
-    "technical_failure": false
-  },
   "public_tests": {
     "returncode": 0,
-    "stdout": "...............                                                          [100%]\n15 passed in 0.40s\n",
+    "stdout": "...............                                                          [100%]\n15 passed in 0.47s\n",
     "stderr": "",
     "technical_failure": false
   },
@@ -78,5 +71,5 @@
     "choose_one": true,
     "note": "Ch\u1ec9 nh\u1eadn m\u1ed9t trong hai (B1 ho\u1eb7c B2), kh\u00f4ng c\u1ed9ng."
   },
-  "notes": "Packaging + schema + smoke/public tests. Base 100: CP2 40 + CP3 40 + CP4 20. Bonus: ch\u1ecdn m\u1ed9t \u2014 B1 Red t\u1ed1i \u0111a +5 ho\u1eb7c B2 Red Advance t\u1ed1i \u0111a +10. JSON is evidence only \u2014 replay decides bonus. lab_report.md is auto-generated \u2014 do not write by hand."
+  "notes": "Packaging + schema + public tests. Base 100: CP2 40 + CP3 40 + CP4 20. Bonus: ch\u1ecdn m\u1ed9t \u2014 B1 Red t\u1ed1i \u0111a +5 ho\u1eb7c B2 Red Advance t\u1ed1i \u0111a +10. JSON is evidence only \u2014 replay decides bonus. lab_report.md is auto-generated \u2014 do not write by hand."
 }

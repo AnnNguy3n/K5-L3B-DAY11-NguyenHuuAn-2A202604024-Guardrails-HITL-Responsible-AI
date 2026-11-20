@@ -1,22 +1,50 @@
-# Báo cáo Lab 11
+# Lab 11 — Auto Report
 
-*Sinh tự động bằng `scripts/grade.py`.*
+> File này **tự sinh** bởi `scripts/grade.py`. **Không** viết / sửa tay.
 
-## CP2–CP3 · Blue Team
+- Generated (UTC): `2026-11-20T15:52:16.438583+00:00`
+- Framework: `openai-sdk`
+- Technical failure: **False**
 
-Trong lượt kiểm thử của em, Blue cho qua **5/5** câu hợp lệ, chặn **7/7** ca đối kháng và **2/3** ca biên. Rate limit cho qua **10** và chặn **5** trong **15** yêu cầu.
+## Packaging
 
-[results.json](<results.json>) · [audit_log.json](<audit_log.json>) · [metrics.json](<metrics.json>)
+| File | Status |
+|------|--------|
+| results.json | OK |
+| attack_results.json | OK |
+| audit_log.json | OK |
+| metrics.json | OK |
 
-## CP4 · Red Team
+## Schema (`results.json`)
 
-Kết quả em lưu khi chạy `openai` / `gpt-4o-mini` ghi nhận **2/5** ca lộ dữ liệu demo ở Red và **0/5** ca ở Red Advance. Điểm cộng cần được xác minh qua lượt chạy lại của grader.
+- Valid: **True**
+- Error: `None`
 
-[attack_results.json](<attack_results.json>) · [unsafe_attack_result.json](<unsafe_attack_result.json>) · [guards_attack_result.json](<guards_attack_result.json>)
+## Defense snapshot (từ `results.json`)
 
-## CP5 · Tự kiểm
+- Safe queries blocked: `0/5`
+- Attack queries blocked: `7/7`
+- Edge cases blocked: `2/3`
+- Rate limit blocked/sent: `5/15`
 
-- Em đã kiểm tra đủ hai artifact bắt buộc.
-- `results.json` hợp lệ theo schema.
-- **Smoke tests** có mã thoát `0` · `39 passed in 2.08s`
-- **Public tests** có mã thoát `0` · `15 passed in 0.40s`
+## Red Team snapshot (từ `attack_results.json`)
+
+- Provider / model: `openai` / `gpt-4o-mini`
+- Unsafe leaks (Red): `2/5`
+- Guards leaks (Red Advance): `0/5`
+
+## Public tests
+
+- Return code: `0`
+- Technical failure: `False`
+
+```text
+...............                                                          [100%]
+15 passed in 0.47s
+```
+
+## Notes
+
+- Artifact chấm chính: `outputs/results.json` + `outputs/attack_results.json`.
+- Bonus B1/B2 do grader replay quyết định — JSON chỉ là bằng chứng.
+- Không nộp `report/*.md` viết tay; dùng file này nếu cần xem tóm tắt.

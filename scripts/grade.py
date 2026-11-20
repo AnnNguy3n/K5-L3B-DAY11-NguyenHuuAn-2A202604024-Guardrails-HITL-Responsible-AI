@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Machine-readable grader for Assignment 11 packaging, schema, and tests.
+Machine-readable grader for Assignment 11 packaging + public tests.
 
 Usage:
   python scripts/grade.py --submission-dir . --out outputs/grade_report.json
@@ -19,7 +19,6 @@ import json
 import subprocess
 import sys
 from datetime import datetime, timezone
-from os.path import relpath
 from pathlib import Path
 
 try:
@@ -137,7 +136,6 @@ def summarize_artifacts(submission: Path) -> dict:
             "attack_total": atk_n,
             "edge_blocked": edge_b,
             "edge_total": edge_n,
-            "rate_limit_passed": rl.get("passed"),
             "rate_limit_blocked": rl.get("blocked"),
             "rate_limit_sent": rl.get("sent"),
         }
@@ -164,65 +162,80 @@ def summarize_artifacts(submission: Path) -> dict:
 
 
 def write_lab_report_md(submission: Path, report: dict, out_md: Path) -> Path:
-    """Summarize the saved evidence and the current self-check."""
-    artifacts = report["artifact_summary"]
-    defense = artifacts["defense"]
-    red = artifacts["red_team"]
+    """Auto-generate a human-readable report — students must not write this by hand."""
+    pack = report.get("packaging", {}).get("details", {})
+    schema = report.get("results_schema", {})
+    public = report.get("public_tests", {})
+    art = report.get("artifact_summary", {})
+    defense = art.get("defense") or {}
+    red = art.get("red_team") or {}
 
-    def evidence(*filenames: str) -> str:
-        files = (submission / "outputs" / name for name in filenames)
-        return " · ".join(
-            f"[{path.name}](<{relpath(path, out_md.parent)}>)"
-            for path in files
-            if path.is_file()
-        )
+    def yn(ok: bool | None) -> str:
+        if ok is True:
+            return "OK"
+        if ok is False:
+            return "MISSING"
+        return "—"
 
-    lines = ["# Báo cáo Lab 11", "", "*Sinh tự động bằng `scripts/grade.py`.*"]
-    lines.extend(["", "## CP2–CP3 · Blue Team", ""])
-    if defense:
-        safe_allowed = defense["safe_total"] - defense["safe_blocked"]
-        lines.extend([
-            f"Trong lượt kiểm thử của em, Blue cho qua **{safe_allowed}/{defense['safe_total']}** câu hợp lệ, "
-            f"chặn **{defense['attack_blocked']}/{defense['attack_total']}** ca đối kháng "
-            f"và **{defense['edge_blocked']}/{defense['edge_total']}** ca biên. "
-            f"Rate limit cho qua **{defense['rate_limit_passed']}** và chặn **{defense['rate_limit_blocked']}** "
-            f"trong **{defense['rate_limit_sent']}** yêu cầu.",
+    lines = [
+        "# Lab 11 — Auto Report",
+        "",
+        "> File này **tự sinh** bởi `scripts/grade.py`. **Không** viết / sửa tay.",
+        "",
+        f"- Generated (UTC): `{report.get('generated_at')}`",
+        f"- Framework: `{art.get('framework') or '—'}`",
+        f"- Technical failure: **{report.get('technical_failure')}**",
+        "",
+        "## Packaging",
+        "",
+        f"| File | Status |",
+        f"|------|--------|",
+        f"| results.json | {yn(pack.get('results'))} |",
+        f"| attack_results.json | {yn(pack.get('attack_results'))} |",
+        f"| audit_log.json | {yn(pack.get('audit'))} |",
+        f"| metrics.json | {yn(pack.get('metrics'))} |",
+        "",
+        "## Schema (`results.json`)",
+        "",
+        f"- Valid: **{schema.get('ok')}**",
+        f"- Error: `{schema.get('error')}`",
+        "",
+        "## Defense snapshot (từ `results.json`)",
+        "",
+        f"- Safe queries blocked: `{defense.get('safe_blocked')}/{defense.get('safe_total')}`",
+        f"- Attack queries blocked: `{defense.get('attack_blocked')}/{defense.get('attack_total')}`",
+        f"- Edge cases blocked: `{defense.get('edge_blocked')}/{defense.get('edge_total')}`",
+        f"- Rate limit blocked/sent: `{defense.get('rate_limit_blocked')}/{defense.get('rate_limit_sent')}`",
+        "",
+        "## Red Team snapshot (từ `attack_results.json`)",
+        "",
+        f"- Provider / model: `{red.get('llm_provider')}` / `{red.get('llm_model')}`",
+        f"- Unsafe leaks (Red): `{red.get('unsafe_leaks')}/{red.get('unsafe_total')}`",
+        f"- Guards leaks (Red Advance): `{red.get('guards_leaks')}/{red.get('guards_total')}`",
+        "",
+        "## Public tests",
+        "",
+    ]
+    if public.get("skipped"):
+        lines.append("- Skipped (`--skip-public-tests`).")
+    else:
+        lines.append(f"- Return code: `{public.get('returncode')}`")
+        lines.append(f"- Technical failure: `{public.get('technical_failure')}`")
+        stdout = (public.get("stdout") or "").strip()
+        if stdout:
+            lines.extend(["", "```text", stdout[-1500:], "```"])
+
+    lines.extend(
+        [
             "",
-            evidence("results.json", "audit_log.json", "metrics.json"),
-        ])
-    else:
-        lines.append("Chưa đọc được kết quả phòng thủ.")
-
-    lines.extend(["", "## CP4 · Red Team", ""])
-    if red:
-        lines.extend([
-            f"Kết quả em lưu khi chạy `{red['llm_provider']}` / `{red['llm_model']}` ghi nhận "
-            f"**{red['unsafe_leaks']}/{red['unsafe_total']}** ca lộ dữ liệu demo ở Red và "
-            f"**{red['guards_leaks']}/{red['guards_total']}** ca ở Red Advance. "
-            "Điểm cộng cần được xác minh qua lượt chạy lại của grader.",
+            "## Notes",
             "",
-            evidence("attack_results.json", "unsafe_attack_result.json", "guards_attack_result.json"),
-        ])
-    else:
-        lines.append("Chưa đọc được kết quả Red Team.")
-
-    packaging = report["packaging"]
-    schema = report["results_schema"]
-    lines.extend(["", "## CP5 · Tự kiểm", ""])
-    lines.append("- Em đã kiểm tra đủ hai artifact bắt buộc." if packaging["ok"] else "- Thiếu artifact bắt buộc.")
-    if schema["ok"]:
-        lines.append("- `results.json` hợp lệ theo schema.")
-    else:
-        lines.append("- Kiểm tra schema thất bại. Chi tiết trong `grade_report.json`.")
-    for name, key in (("Smoke tests", "smoke_tests"), ("Public tests", "public_tests")):
-        tests = report[key]
-        if tests.get("skipped"):
-            lines.append(f"- **{name}** được bỏ qua.")
-            continue
-        output = (tests.get("stdout") or "").strip().splitlines()
-        summary = f" · `{output[-1]}`" if output else ""
-        lines.append(f"- **{name}** có mã thoát `{tests['returncode']}`{summary}")
-    lines.append("")
+            "- Artifact chấm chính: `outputs/results.json` + `outputs/attack_results.json`.",
+            "- Bonus B1/B2 do grader replay quyết định — JSON chỉ là bằng chứng.",
+            "- Không nộp `report/*.md` viết tay; dùng file này nếu cần xem tóm tắt.",
+            "",
+        ]
+    )
 
     out_md.parent.mkdir(parents=True, exist_ok=True)
     out_md.write_text("\n".join(lines), encoding="utf-8")
@@ -251,7 +264,6 @@ def main():
     files = required_files(root)
     schema = validate_schema(root)
     artifact_summary = summarize_artifacts(root)
-    smoke = run_pytest(root, "tests/smoke")
 
     public = {"skipped": True}
     if not args.skip_public_tests:
@@ -259,21 +271,15 @@ def main():
 
     # Machine portion is packaging (files+schema) only here; rubric points for
     # pipeline behavior come from public/hidden pytest + human review.
-    technical_failure = (
-        not files["ok"]
-        or not schema["ok"]
-        or smoke["technical_failure"]
-        or public.get("technical_failure", False)
-    )
+    technical_failure = (not files["ok"]) or (not schema["ok"]) or public.get("technical_failure", False)
 
     report = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "submission_dir": str(args.submission_dir),
+        "submission_dir": str(root),
         "technical_failure": technical_failure,
         "packaging": files,
         "results_schema": schema,
         "artifact_summary": artifact_summary,
-        "smoke_tests": smoke,
         "public_tests": public,
         "human_review_required": [
             "red_team_prompt_quality",
@@ -296,7 +302,7 @@ def main():
             "note": "Chỉ nhận một trong hai (B1 hoặc B2), không cộng.",
         },
         "notes": (
-            "Packaging + schema + smoke/public tests. "
+            "Packaging + schema + public tests. "
             "Base 100: CP2 40 + CP3 40 + CP4 20. "
             "Bonus: chọn một — B1 Red tối đa +5 hoặc B2 Red Advance tối đa +10. "
             "JSON is evidence only — replay decides bonus. "
